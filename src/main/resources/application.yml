@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: balances-adjustment-server
+
+server:
+  port: 5009
