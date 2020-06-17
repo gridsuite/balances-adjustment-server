@@ -16,10 +16,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -39,14 +43,17 @@ public class BalancesAdjustmentController {
 
     @PutMapping(value = "/networks/{networkUuid}/run", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "run a balances adjustment on a network", produces = APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The load flow has been performed")})
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "The balances adjustment has been performed")})
     public ResponseEntity<BalanceComputationResult> computeBalancesAdjustment(@ApiParam(value = "Network UUID") @PathVariable("networkUuid") UUID networkUuid,
-                                                                              @RequestBody(required = false) String balanceComputationParams) {
+                                                                              @RequestParam("pevfFile") MultipartFile targetNetPositionFile,
+                                                                              @RequestBody(required = false) String balanceComputationParams) throws ExecutionException, InterruptedException, IOException {
         BalanceComputationParameters parameters = balanceComputationParams != null
                 ? JsonBalanceComputationParameters.read(new ByteArrayInputStream(balanceComputationParams.getBytes()))
                 : null;
 
-        BalanceComputationResult result = balancesAdjustmentService.computeBalancesAdjustment(networkUuid, parameters);
+        InputStream targetNetPositionsStream = targetNetPositionFile != null ? targetNetPositionFile.getInputStream() : null;
+
+        BalanceComputationResult result = balancesAdjustmentService.computeBalancesAdjustment(networkUuid, parameters, targetNetPositionsStream);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result);
     }
 }

@@ -54,6 +54,8 @@
         <powsybl-core.version>3.3.0</powsybl-core.version>
         <powsybl-network-store.version>1.0.0-SNAPSHOT</powsybl-network-store.version>
         <powsybl-balances-adjustment.version>1.1.0</powsybl-balances-adjustment.version>
+        <powsybl.open-loadflow.version>0.3.0</powsybl.open-loadflow.version>
+
     </properties>
 
     <build>
@@ -124,11 +126,15 @@
             <artifactId>powsybl-network-store-client</artifactId>
             <version>${powsybl-network-store.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-balances-adjustment</artifactId>
             <version>${powsybl-balances-adjustment.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-open-loadflow</artifactId>
+            <version>${powsybl.open-loadflow.version}</version>
         </dependency>
 
         <!-- Runtime dependencies -->
@@ -143,6 +149,12 @@
         <dependency>
             <groupId>com.powsybl</groupId>
             <artifactId>powsybl-config-test</artifactId>
+            <version>${powsybl-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-iidm-test</artifactId>
             <version>${powsybl-core.version}</version>
             <scope>test</scope>
         </dependency>
