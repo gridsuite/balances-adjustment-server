@@ -69,7 +69,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, false);
         assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
     }
 
@@ -83,7 +83,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, false);
         assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
     }
 
@@ -91,7 +91,7 @@ public class BalancesAdjustmentTest {
     public void testNetworkComputationAreasCreation() {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
-            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions);
+            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false);
 
             assertEquals(4, targetNetPositions.size());
             assertEquals(-1100.3, targetNetPositions.get("BE"), 0.001);

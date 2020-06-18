@@ -53,7 +53,7 @@ public class BalancesAdjustmentController {
 
         InputStream targetNetPositionsStream = targetNetPositionFile != null ? targetNetPositionFile.getInputStream() : null;
 
-        BalanceComputationResult result = balancesAdjustmentService.computeBalancesAdjustment(networkUuid, parameters, targetNetPositionsStream);
+        BalanceComputationResult result = balancesAdjustmentService.computeBalancesAdjustment(networkUuid, parameters, targetNetPositionsStream, false);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(result);
     }
 }

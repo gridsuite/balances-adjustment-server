@@ -58,31 +58,31 @@ public class BalancesAdjustmentService {
         }
     }
 
-    BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, BalanceComputationParameters parameters, InputStream targetNetPositionsStream) throws ExecutionException, InterruptedException, IOException {
+    BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, BalanceComputationParameters parameters, InputStream targetNetPositionsStream, boolean iterative) throws ExecutionException, InterruptedException, IOException {
         Network network = getNetwork(networkUuid);
 
         BalanceComputationParameters params = parameters != null ? parameters : new BalanceComputationParameters();
         Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
 
         BalanceComputationFactory balanceComputationFactory = new BalanceComputationFactoryImpl();
-        List<BalanceComputationArea> computationAreas = createBalanceComputationAreas(network, targetNetPositions);
+        List<BalanceComputationArea> computationAreas = createBalanceComputationAreas(network, targetNetPositions, iterative);
         BalanceComputation balanceComputation = balanceComputationFactory.create(computationAreas, LoadFlow.find(), new LocalComputationManagerFactory().create());
         // launch the balances adjustment on the network
         CompletableFuture<BalanceComputationResult> result = balanceComputation.run(network, VariantManagerConstants.INITIAL_VARIANT_ID, params);
         return result.get();
     }
 
-    List<BalanceComputationArea> createBalanceComputationAreas(Network network, Map<String, Double> targetNetPositions) {
+    List<BalanceComputationArea> createBalanceComputationAreas(Network network, Map<String, Double> targetNetPositions, boolean iterative) {
         Map<String, NetworkAreaFactory> networkAreas = network.getCountries().stream()
                 .collect(Collectors.toMap(Country::toString, CountryAreaFactory::new));
 
         return network.getCountries().stream()
-                .map(country -> createBalanceComputationArea(network, country, networkAreas, targetNetPositions))
+                .map(country -> createBalanceComputationArea(network, country, networkAreas, targetNetPositions, iterative))
                 .filter(balanceComputationArea -> balanceComputationArea != null)
                 .collect(Collectors.toList());
     }
 
-    private BalanceComputationArea createBalanceComputationArea(Network network, Country country, Map<String, NetworkAreaFactory> networkAreas, Map<String, Double> targetNetPositions) {
+    private BalanceComputationArea createBalanceComputationArea(Network network, Country country, Map<String, NetworkAreaFactory> networkAreas, Map<String, Double> targetNetPositions, boolean iterative) {
         String countryName = country.getName();
         String countryCode = country.toString();
         NetworkAreaFactory networkArea = networkAreas.get(countryCode);
@@ -100,6 +100,6 @@ public class BalancesAdjustmentService {
             scalables.add(Scalable.onGenerator(g.getId()));
             LOGGER.debug("Addition of percentage {} for generator {}", g.getTargetP() / countryGeneratorsTotalP * 100, g.getId());
         }
-        return countryGenerators.size() > 0 && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables), targetNetPosition) : null;
+        return countryGenerators.size() > 0 && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables, iterative), targetNetPosition) : null;
     }
 }
