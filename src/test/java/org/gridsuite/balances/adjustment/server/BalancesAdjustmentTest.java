@@ -88,7 +88,7 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
-    public void testNetworkComputationAreasCreation() {
+    public void testNetworkComputationAreasCreationNoIterativeMode() {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
             List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false);
@@ -151,6 +151,10 @@ public class BalancesAdjustmentTest {
             assertEquals(2285.7142, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.001);
             assertEquals(2285.7142, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.001);
             assertEquals(3428.5714, testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.001);
+            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 15000, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(6571.4285, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(6571.4285, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("FFR3AA1 _generator").getMaxP(), testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.001);
             balanceComputationAreas.get(1).getScalable().reset(testNetwork);
             assertEquals(0, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.001);
             assertEquals(0, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.001);
@@ -203,11 +207,53 @@ public class BalancesAdjustmentTest {
             assertEquals(2000, testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.001);
             assertEquals(666.6666, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.001);
             assertEquals(3333.3333, testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.001);
+            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 25000, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(testNetwork.getGenerator("NNL1AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(3444.4443, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("NNL3AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.001);
             balanceComputationAreas.get(3).getScalable().reset(testNetwork);
             assertEquals(0, testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.001);
             assertEquals(0, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.001);
             assertEquals(0, testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.001);
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testNetworkComputationAreasCreationIterativeMode() {
+        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
+            Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
+            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true);
+
+            // BELGIUM
+            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(1607.14285, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(2678.5714, testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.001);
+            assertEquals(3214.2857, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.001);
+            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 20000, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(testNetwork.getGenerator("BBE1AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("BBE3AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("BBE2AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.001);
+
+            // FRANCE
+            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 15000, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(6500, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(6500, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("FFR3AA1 _generator").getMaxP(), testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.001);
+
+            // GERMANY
+            balanceComputationAreas.get(2).getScalable().scale(testNetwork, 17000, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(testNetwork.getGenerator("DDE1AA1 _generator").getMaxP(), testNetwork.getGenerator("DDE1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(8000, testNetwork.getGenerator("DDE2AA1 _generator").getTargetP(), 0.001);
+            assertEquals(6000, testNetwork.getGenerator("DDE3AA1 _generator").getTargetP(), 0.001);
+
+            // NETHERLANDS
+            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 25000, Scalable.ScalingConvention.GENERATOR);
+            assertEquals(testNetwork.getGenerator("NNL1AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("NNL2AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.001);
+            assertEquals(testNetwork.getGenerator("NNL3AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.001);
         } catch (IOException e) {
             e.printStackTrace();
         }
