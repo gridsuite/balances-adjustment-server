@@ -20,6 +20,8 @@ import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import org.gridsuite.balances.adjustment.server.importer.TargetNetPositionsImporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,8 @@ import java.util.stream.Collectors;
 @ComponentScan(basePackageClasses = {NetworkStoreService.class})
 @Service
 public class BalancesAdjustmentService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BalancesAdjustmentService.class);
 
     @Autowired
     private NetworkStoreService networkStoreService;
@@ -74,6 +78,7 @@ public class BalancesAdjustmentService {
 
         return network.getCountries().stream()
                 .map(country -> createBalanceComputationArea(network, country, networkAreas, targetNetPositions))
+                .filter(balanceComputationArea -> balanceComputationArea != null)
                 .collect(Collectors.toList());
     }
 
@@ -81,18 +86,20 @@ public class BalancesAdjustmentService {
         String countryName = country.getName();
         String countryCode = country.toString();
         NetworkAreaFactory networkArea = networkAreas.get(countryCode);
-        double targetNetPosition = targetNetPositions.get(countryCode);
-        List<Generator> countryGenerators = network.getGeneratorStream().filter(g -> g.getRegulatingTerminal().getVoltageLevel().getSubstation().getCountry().equals(country.getName())).collect(Collectors.toList());
+        Double targetNetPosition = targetNetPositions.get(countryCode);
+        List<Generator> countryGenerators = network.getGeneratorStream().filter(g -> country.getName().equals(g.getTerminal().getVoltageLevel().getSubstation().getCountry().get().getName())).collect(Collectors.toList());
         double countryGeneratorsTotalP = 0d;
         for (Generator g : countryGenerators) {
             countryGeneratorsTotalP += g.getTargetP();
         }
         List<Float> percentages = new ArrayList<>();
         List<Scalable> scalables = new ArrayList<>();
+        LOGGER.debug("Size of generators list: {} for country {}", countryGenerators.size(), countryName);
         for (Generator g : countryGenerators) {
             percentages.add((float) (g.getTargetP() / countryGeneratorsTotalP * 100));
             scalables.add(Scalable.onGenerator(g.getId()));
+            LOGGER.debug("Addition of percentage {} for generator {}", g.getTargetP() / countryGeneratorsTotalP * 100, g.getId());
         }
-        return new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables), targetNetPosition);
+        return countryGenerators.size() > 0 && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables), targetNetPosition) : null;
     }
 }
