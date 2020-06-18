@@ -68,11 +68,16 @@ public class BalancesAdjustmentService {
         List<BalanceComputationArea> computationAreas = createBalanceComputationAreas(network, targetNetPositions, iterative);
         BalanceComputation balanceComputation = balanceComputationFactory.create(computationAreas, LoadFlow.find(), new LocalComputationManagerFactory().create());
         // launch the balances adjustment on the network
-        CompletableFuture<BalanceComputationResult> result = balanceComputation.run(network, VariantManagerConstants.INITIAL_VARIANT_ID, params);
-        return result.get();
+        CompletableFuture<BalanceComputationResult> futureResult = balanceComputation.run(network, VariantManagerConstants.INITIAL_VARIANT_ID, params);
+
+        BalanceComputationResult result = futureResult.get();
+        if (result.getStatus() == BalanceComputationResult.Status.SUCCESS) {
+            networkStoreService.flush(network);
+        }
+        return result;
     }
 
-    List<BalanceComputationArea> createBalanceComputationAreas(Network network, Map<String, Double> targetNetPositions, boolean iterative) {
+    public List<BalanceComputationArea> createBalanceComputationAreas(Network network, Map<String, Double> targetNetPositions, boolean iterative) {
         Map<String, NetworkAreaFactory> networkAreas = network.getCountries().stream()
                 .collect(Collectors.toMap(Country::toString, CountryAreaFactory::new));
 
