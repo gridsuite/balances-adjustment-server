@@ -45,7 +45,7 @@ public class BalancesAdjustmentController {
     @ApiOperation(value = "run a balances adjustment on a network", produces = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The balances adjustment has been performed")})
     public ResponseEntity<BalanceComputationResult> computeBalancesAdjustment(@ApiParam(value = "Network UUID") @PathVariable("networkUuid") UUID networkUuid,
-                                                                              @RequestParam("pevfFile") MultipartFile targetNetPositionFile,
+                                                                              @RequestParam("targetNetPositionFile") MultipartFile targetNetPositionFile,
                                                                               @RequestBody(required = false) String balanceComputationParams) throws ExecutionException, InterruptedException, IOException {
         BalanceComputationParameters parameters = balanceComputationParams != null
                 ? JsonBalanceComputationParameters.read(new ByteArrayInputStream(balanceComputationParams.getBytes()))

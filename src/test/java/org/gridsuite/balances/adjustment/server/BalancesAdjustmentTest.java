@@ -2,10 +2,14 @@ package org.gridsuite.balances.adjustment.server;
 
 import com.powsybl.action.util.Scalable;
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationArea;
+import com.powsybl.balances_adjustment.balance_computation.BalanceComputationParameters;
+import com.powsybl.balances_adjustment.balance_computation.BalanceComputationResult;
+import com.powsybl.balances_adjustment.balance_computation.json_parameters.JsonBalanceComputationParameters;
 import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.network.Injection;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
+import com.powsybl.network.store.client.PreloadingStrategy;
 import org.gridsuite.balances.adjustment.server.importer.TargetNetPositionsImporter;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,15 +21,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.ResourceUtils;
 
+import javax.inject.Inject;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BalancesAdjustmentController.class)
@@ -37,6 +47,9 @@ public class BalancesAdjustmentTest {
     @Autowired
     private MockMvc mvc;
 
+    @Inject
+    private BalancesAdjustmentService balancesAdjustmentService;
+
     @MockBean
     private NetworkStoreService networkStoreService;
 
@@ -47,9 +60,36 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
+    public void testSuccessBalancesAdjustmentComputation() throws InterruptedException, ExecutionException, IOException {
+        UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
+
+        given(networkStoreService.getNetwork(testNetworkId, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
+
+        InputStream balanceComputationParametersIStream = new FileInputStream(ResourceUtils.getFile("classpath:balanceComputationParameters.json"));
+        BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
+
+        InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
+        assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
+    }
+
+    @Test
+    public void testFailedWorkingBalancesAdjustmentComputation() throws InterruptedException, ExecutionException, IOException {
+        UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
+
+        given(networkStoreService.getNetwork(testNetworkId, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
+
+        InputStream balanceComputationParametersIStream = new FileInputStream(ResourceUtils.getFile("classpath:balanceComputationParameters.json"));
+        BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
+
+        InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
+        assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
+    }
+
+    @Test
     public void testNetworkComputationAreasCreation() {
-        BalancesAdjustmentService balancesAdjustmentService = new BalancesAdjustmentService();
-        try (InputStream targetNetPositionsStream = getClass().getResourceAsStream("/targetNetPositions.json")) {
+        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
             List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions);
 
