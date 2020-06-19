@@ -18,9 +18,16 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.ResourceUtils;
 
 import javax.inject.Inject;
@@ -36,6 +43,8 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(BalancesAdjustmentController.class)
@@ -60,6 +69,49 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
+    public void testBalancesAdjustmentController() throws Exception {
+        UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
+
+        given(networkStoreService.getNetwork(testNetworkId, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
+
+        MockMultipartFile file = new MockMultipartFile("targetNetPositionFile", "workingTargetNetPositions.json",
+                "text/json", new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json")));
+
+        MockMultipartHttpServletRequestBuilder builderOk =
+                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", "7928181c-7977-4592-ba19-88027e4254e4");
+        builderOk.with(new RequestPostProcessor() {
+            @Override
+            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+                request.setMethod("PUT");
+                return request;
+            }
+        });
+
+        // Check request is ok with target net positions multipart file provided
+        MvcResult result = mvc.perform(builderOk
+                .file(file))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertTrue(result.getResponse().getContentAsString().contains("status\":\"SUCCESS\""));
+        assertTrue(result.getResponse().getContentAsString().contains("iterationCount\":2"));
+
+        MockMultipartHttpServletRequestBuilder builderKo =
+                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", "7928181c-7977-4592-ba19-88027e4254e4");
+        builderKo.with(new RequestPostProcessor() {
+            @Override
+            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+                request.setMethod("PUT");
+                return request;
+            }
+        });
+
+        // Check request is ko when no target net position multipart file is provided
+        mvc.perform(builderKo)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     public void testSuccessBalancesAdjustmentComputation() throws InterruptedException, ExecutionException, IOException {
         UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
 
@@ -71,6 +123,7 @@ public class BalancesAdjustmentTest {
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
         BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
         assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
+        assertEquals(2, balanceComputationResult.getIterationCount());
 
         // BELGIUM
         assertEquals(724.8642, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.001);
@@ -105,6 +158,7 @@ public class BalancesAdjustmentTest {
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
         BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, true, false);
         assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
+        assertEquals(11, balanceComputationResult.getIterationCount());
     }
 
     @Test
