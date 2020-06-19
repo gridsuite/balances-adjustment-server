@@ -69,7 +69,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, false);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
         assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
     }
 
@@ -83,7 +83,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, false);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, true, false);
         assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
     }
 
@@ -91,18 +91,26 @@ public class BalancesAdjustmentTest {
     public void testNetworkComputationAreasCreationNoIterativeMode() {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
-            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false);
 
+            // target net positions read from file
             assertEquals(4, targetNetPositions.size());
             assertEquals(-1100.3, targetNetPositions.get("BE"), 0.001);
             assertEquals(-3527.5, targetNetPositions.get("DE"), 0.001);
             assertEquals(5925.7, targetNetPositions.get("FR"), 0.001);
             assertEquals(2398.2, targetNetPositions.get("NL"), 0.001);
 
+            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false, true);
+
+            // target net positions adjusted in the balance computation areas creation
+            assertEquals(4, targetNetPositions.size());
+            assertEquals(-1414.2988, targetNetPositions.get("BE"), 0.001);
+            assertEquals(-4534.1626, targetNetPositions.get("DE"), 0.001);
+            assertEquals(4234.6494, targetNetPositions.get("FR"), 0.001);
+            assertEquals(1713.812, targetNetPositions.get("NL"), 0.001);
+
             // BELGIUM
             assertEquals(4, balanceComputationAreas.size());
             assertEquals("BELGIUM", balanceComputationAreas.get(0).getName());
-            assertEquals(-1100.3, balanceComputationAreas.get(0).getTargetNetPosition(), 0.001);
             assertEquals(-7000, balanceComputationAreas.get(0).getScalable().initialValue(testNetwork), 0.001);
             assertEquals(0, balanceComputationAreas.get(0).getScalable().minimumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
             assertEquals(27000, balanceComputationAreas.get(0).getScalable().maximumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
@@ -134,7 +142,6 @@ public class BalancesAdjustmentTest {
             injections.clear();
             notFound.clear();
             assertEquals("FRANCE", balanceComputationAreas.get(1).getName());
-            assertEquals(5925.7, balanceComputationAreas.get(1).getTargetNetPosition(), 0.001);
             assertEquals(-7000, balanceComputationAreas.get(1).getScalable().initialValue(testNetwork), 0.001);
             assertEquals(0, balanceComputationAreas.get(1).getScalable().minimumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
             assertEquals(27000, balanceComputationAreas.get(1).getScalable().maximumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
@@ -164,7 +171,6 @@ public class BalancesAdjustmentTest {
             injections.clear();
             notFound.clear();
             assertEquals("GERMANY", balanceComputationAreas.get(2).getName());
-            assertEquals(-3527.5, balanceComputationAreas.get(2).getTargetNetPosition(), 0.001);
             assertEquals(-6000, balanceComputationAreas.get(2).getScalable().initialValue(testNetwork), 0.001);
             assertEquals(0, balanceComputationAreas.get(2).getScalable().minimumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
             assertEquals(27000, balanceComputationAreas.get(2).getScalable().maximumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
@@ -190,7 +196,6 @@ public class BalancesAdjustmentTest {
             injections.clear();
             notFound.clear();
             assertEquals("NETHERLANDS", balanceComputationAreas.get(3).getName());
-            assertEquals(2398.2, balanceComputationAreas.get(3).getTargetNetPosition(), 0.001);
             assertEquals(-4500, balanceComputationAreas.get(3).getScalable().initialValue(testNetwork), 0.001);
             assertEquals(0, balanceComputationAreas.get(3).getScalable().minimumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
             assertEquals(27000, balanceComputationAreas.get(3).getScalable().maximumValue(testNetwork, Scalable.ScalingConvention.GENERATOR), 0.001);
@@ -225,7 +230,7 @@ public class BalancesAdjustmentTest {
     public void testNetworkComputationAreasCreationIterativeMode() {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
-            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true);
+            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true, true);
 
             // BELGIUM
             balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, Scalable.ScalingConvention.GENERATOR);
