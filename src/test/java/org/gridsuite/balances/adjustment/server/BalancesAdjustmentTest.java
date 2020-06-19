@@ -71,6 +71,26 @@ public class BalancesAdjustmentTest {
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
         BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
         assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
+
+        // BELGIUM
+        assertEquals(724.8642, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.001);
+        assertEquals(1208.1071, testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.001);
+        assertEquals(1449.7285, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.001);
+
+        // FRANCE
+        assertEquals(3143.6285, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.001);
+        assertEquals(3143.6285, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.001);
+        assertEquals(4715.4428, testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.001);
+
+        // GERMANY
+        assertEquals(1665.2083, testNetwork.getGenerator("DDE1AA1 _generator").getTargetP(), 0.001);
+        assertEquals(1332.1666, testNetwork.getGenerator("DDE2AA1 _generator").getTargetP(), 0.001);
+        assertEquals(999.1249, testNetwork.getGenerator("DDE3AA1 _generator").getTargetP(), 0.001);
+
+        // NETHERLANDS
+        assertEquals(2039.3999, testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.001);
+        assertEquals(679.7999, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.001);
+        assertEquals(3399.0000, testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.001);
     }
 
     @Test
@@ -89,24 +109,24 @@ public class BalancesAdjustmentTest {
 
     @Test
     public void testNetworkComputationAreasCreationNoIterativeMode() {
-        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
+        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
 
             // target net positions read from file
             assertEquals(4, targetNetPositions.size());
-            assertEquals(-1100.3, targetNetPositions.get("BE"), 0.001);
-            assertEquals(-3527.5, targetNetPositions.get("DE"), 0.001);
-            assertEquals(5925.7, targetNetPositions.get("FR"), 0.001);
-            assertEquals(2398.2, targetNetPositions.get("NL"), 0.001);
+            assertEquals(-2117.3, targetNetPositions.get("BE"), 0.001);
+            assertEquals(-4503.5, targetNetPositions.get("DE"), 0.001);
+            assertEquals(5002.7, targetNetPositions.get("FR"), 0.001);
+            assertEquals(1618.2, targetNetPositions.get("NL"), 0.001);
 
             List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false, true);
 
-            // target net positions adjusted in the balance computation areas creation
+            // target net positions not changed in the balance computation areas creation
             assertEquals(4, targetNetPositions.size());
-            assertEquals(-1414.2988, targetNetPositions.get("BE"), 0.001);
-            assertEquals(-4534.1626, targetNetPositions.get("DE"), 0.001);
-            assertEquals(4234.6494, targetNetPositions.get("FR"), 0.001);
-            assertEquals(1713.812, targetNetPositions.get("NL"), 0.001);
+            assertEquals(-2117.3, targetNetPositions.get("BE"), 0.001);
+            assertEquals(-4503.5, targetNetPositions.get("DE"), 0.001);
+            assertEquals(5002.7, targetNetPositions.get("FR"), 0.001);
+            assertEquals(1618.2, targetNetPositions.get("NL"), 0.001);
 
             // BELGIUM
             assertEquals(4, balanceComputationAreas.size());
@@ -228,7 +248,7 @@ public class BalancesAdjustmentTest {
 
     @Test
     public void testNetworkComputationAreasCreationIterativeMode() {
-        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
+        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
             List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true, true);
 
@@ -261,6 +281,29 @@ public class BalancesAdjustmentTest {
             assertEquals(testNetwork.getGenerator("NNL3AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.001);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testTargetNetPositions() throws IOException {
+        try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
+            Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
+
+            // target net positions read from file
+            assertEquals(4, targetNetPositions.size());
+            assertEquals(-1100.3, targetNetPositions.get("BE"), 0.001);
+            assertEquals(-3527.5, targetNetPositions.get("DE"), 0.001);
+            assertEquals(5925.7, targetNetPositions.get("FR"), 0.001);
+            assertEquals(2398.2, targetNetPositions.get("NL"), 0.001);
+
+            balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false, true);
+
+            // target net positions adjusted in the balance computation areas creation
+            assertEquals(4, targetNetPositions.size());
+            assertEquals(-1414.2988, targetNetPositions.get("BE"), 0.001);
+            assertEquals(-4534.1626, targetNetPositions.get("DE"), 0.001);
+            assertEquals(4234.6494, targetNetPositions.get("FR"), 0.001);
+            assertEquals(1713.812, targetNetPositions.get("NL"), 0.001);
         }
     }
 }
