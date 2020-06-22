@@ -174,9 +174,10 @@ public class BalancesAdjustmentService {
         List<Scalable> scalables = new ArrayList<>();
         LOGGER.debug("Size of generators list: {} for country {}", countryGenerators.size(), countryName);
         for (Generator g : countryGenerators) {
-            percentages.add((float) (g.getTargetP() / countryGeneratorsTotalP * 100));
+            float percent = countryGeneratorsTotalP != 0. ? (float) (g.getTargetP() / countryGeneratorsTotalP * 100) : 100;
+            percentages.add(percent);
             scalables.add(Scalable.onGenerator(g.getId()));
-            LOGGER.debug("Addition of percentage {} for generator {}", g.getTargetP() / countryGeneratorsTotalP * 100, g.getId());
+            LOGGER.debug("Addition of percentage {} for generator {}", percent, g.getId());
         }
         return countryGenerators.size() > 0 && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables, iterative), targetNetPosition) : null;
     }
