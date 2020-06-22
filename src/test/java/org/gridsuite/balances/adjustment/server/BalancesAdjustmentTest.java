@@ -77,6 +77,9 @@ public class BalancesAdjustmentTest {
         MockMultipartFile file = new MockMultipartFile("targetNetPositionFile", "workingTargetNetPositions.json",
                 "text/json", new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json")));
 
+        MockMultipartFile parametersFile = new MockMultipartFile("balanceComputationParamsFile", "balanceComputationParameters.json",
+                "text/json", new FileInputStream(ResourceUtils.getFile("classpath:balanceComputationParameters.json")));
+
         MockMultipartHttpServletRequestBuilder builderOk =
                 MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", "7928181c-7977-4592-ba19-88027e4254e4");
         builderOk.with(new RequestPostProcessor() {
@@ -87,7 +90,7 @@ public class BalancesAdjustmentTest {
             }
         });
 
-        // Check request is ok with target net positions multipart file provided
+        // Check request is ok with only target net positions multipart file provided
         MvcResult result = mvc.perform(builderOk
                 .file(file))
                 .andExpect(status().isOk())
@@ -96,6 +99,15 @@ public class BalancesAdjustmentTest {
         assertTrue(result.getResponse().getContentAsString().contains("status\":\"SUCCESS\""));
         assertTrue(result.getResponse().getContentAsString().contains("iterationCount\":2"));
 
+        // Check request is ok with target net positions multipart file and balance computation parameters file provided
+        result = mvc.perform(builderOk
+                .file(parametersFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertTrue(result.getResponse().getContentAsString().contains("status\":\"SUCCESS\""));
+
+        // Check request is ko when no target net position multipart file is provided
         MockMultipartHttpServletRequestBuilder builderKo =
                 MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", "7928181c-7977-4592-ba19-88027e4254e4");
         builderKo.with(new RequestPostProcessor() {
@@ -106,7 +118,6 @@ public class BalancesAdjustmentTest {
             }
         });
 
-        // Check request is ko when no target net position multipart file is provided
         mvc.perform(builderKo)
                 .andExpect(status().isBadRequest());
     }

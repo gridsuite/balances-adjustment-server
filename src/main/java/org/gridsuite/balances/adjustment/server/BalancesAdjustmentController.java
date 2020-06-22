@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -45,10 +44,10 @@ public class BalancesAdjustmentController {
     @ApiOperation(value = "run a balances adjustment on a network", produces = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {@ApiResponse(code = 200, message = "The balances adjustment has been performed")})
     public ResponseEntity<BalanceComputationResult> computeBalancesAdjustment(@ApiParam(value = "Network UUID") @PathVariable("networkUuid") UUID networkUuid,
-                                                                              @RequestParam("targetNetPositionFile") MultipartFile targetNetPositionFile,
-                                                                              @RequestBody(required = false) String balanceComputationParams) throws ExecutionException, InterruptedException, IOException {
+                                                                              @RequestParam(value = "balanceComputationParamsFile", required = false) MultipartFile balanceComputationParams,
+                                                                              @RequestParam("targetNetPositionFile") MultipartFile targetNetPositionFile) throws ExecutionException, InterruptedException, IOException {
         BalanceComputationParameters parameters = balanceComputationParams != null
-                ? JsonBalanceComputationParameters.read(new ByteArrayInputStream(balanceComputationParams.getBytes()))
+                ? JsonBalanceComputationParameters.read(balanceComputationParams.getInputStream())
                 : null;
 
         InputStream targetNetPositionsStream = targetNetPositionFile != null ? targetNetPositionFile.getInputStream() : null;
