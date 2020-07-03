@@ -6,12 +6,13 @@
  */
 package org.gridsuite.balances.adjustment.server.importer;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public final class TargetNetPositionsImporter {
@@ -24,13 +25,17 @@ public final class TargetNetPositionsImporter {
 
         Map<String, Double> netPositionAreas = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> jsonMap = mapper.readValue(input, Map.class);
-        ArrayList jsonExchangeDataList = (ArrayList) jsonMap.get("netPositions");
-        for (Object object : jsonExchangeDataList) {
-            HashMap<String, Object> jsonObj = (HashMap<String, Object>) object;
-            String area = (String) jsonObj.get("area");
-            double netPosition = (double) jsonObj.get("netPosition");
-            netPositionAreas.put(area, netPosition);
+        JsonNode jsonTree = mapper.readTree(input);
+        if (jsonTree.hasNonNull("netPositions")) {
+            JsonNode jsonExchangeData = jsonTree.get("netPositions");
+            for (Iterator<JsonNode> it = jsonExchangeData.elements(); it.hasNext(); ) {
+                JsonNode areaElement = it.next();
+                if (areaElement.hasNonNull("area") && areaElement.hasNonNull("netPosition")) {
+                    String area = areaElement.get("area").asText();
+                    double netPosition = areaElement.get("netPosition").asDouble();
+                    netPositionAreas.put(area, netPosition);
+                }
+            }
         }
         return netPositionAreas;
     }
