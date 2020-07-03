@@ -7,8 +7,6 @@
 package org.gridsuite.balances.adjustment.server.importer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class TargetNetPositionsImporter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TargetNetPositionsImporter.class);
 
     private TargetNetPositionsImporter() {
         throw new AssertionError("Utility class should not be instantiated");

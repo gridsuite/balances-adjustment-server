@@ -31,10 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -155,7 +152,7 @@ public class BalancesAdjustmentService {
 
         return network.getCountries().stream()
                 .map(country -> createBalanceComputationArea(network, country, networkAreas, targetNetPositions, iterative))
-                .filter(balanceComputationArea -> balanceComputationArea != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -178,12 +175,12 @@ public class BalancesAdjustmentService {
             if (countryGeneratorsTotalP != 0) {
                 percent = (float) (g.getTargetP() / countryGeneratorsTotalP * 100);
             } else {
-                percent = 100 / countryGenerators.size();
+                percent = 100f / countryGenerators.size();
             }
             percentages.add(percent);
             scalables.add(Scalable.onGenerator(g.getId()));
             LOGGER.debug("Addition of percentage {} for generator {}", percent, g.getId());
         }
-        return countryGenerators.size() > 0 && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables, iterative), targetNetPosition) : null;
+        return !countryGenerators.isEmpty() && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables, iterative), targetNetPosition) : null;
     }
 }

@@ -10,8 +10,6 @@ import com.powsybl.balances_adjustment.balance_computation.BalanceComputationPar
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationResult;
 import com.powsybl.balances_adjustment.balance_computation.json_parameters.JsonBalanceComputationParameters;
 import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +32,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Api(tags = "balances-adjustment-server")
 @ComponentScan(basePackageClasses = BalancesAdjustmentService.class)
 public class BalancesAdjustmentController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BalancesAdjustmentController.class);
 
     @Inject
     private BalancesAdjustmentService balancesAdjustmentService;
