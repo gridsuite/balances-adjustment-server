@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: balances-adjustment-server
+
+server:
+  port: 5009
+
+network-store-server:
+  base-uri: http://localhost:8080

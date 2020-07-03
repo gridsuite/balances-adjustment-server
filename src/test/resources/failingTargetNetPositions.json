@@ -1,0 +1,20 @@
+{
+  "netPositions": [
+    {
+      "area": "BE",
+      "netPosition": -1100.3
+    },
+    {
+      "area": "DE",
+      "netPosition": -3527.5
+    },
+    {
+      "area": "FR",
+      "netPosition": 5925.7
+    },
+    {
+      "area": "NL",
+      "netPosition": 2398.2
+    }
+  ]
+}
