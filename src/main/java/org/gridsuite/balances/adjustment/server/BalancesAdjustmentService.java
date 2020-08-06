@@ -12,6 +12,7 @@ import com.powsybl.balances_adjustment.util.CountryAreaFactory;
 import com.powsybl.balances_adjustment.util.NetworkAreaFactory;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.computation.local.LocalComputationManagerFactory;
+import com.powsybl.iidm.mergingview.MergingView;
 import com.powsybl.iidm.network.Country;
 import com.powsybl.iidm.network.Generator;
 import com.powsybl.iidm.network.Injection;
@@ -80,16 +81,32 @@ public class BalancesAdjustmentService {
         });
     }
 
-    public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, BalanceComputationParameters parameters,
+    public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, List<UUID> otherNetworksUuid, BalanceComputationParameters parameters,
                                                               InputStream targetNetPositionsStream)  throws ExecutionException, InterruptedException, IOException {
-        return computeBalancesAdjustment(networkUuid, parameters, targetNetPositionsStream, true, true);
+        return computeBalancesAdjustment(networkUuid, otherNetworksUuid, parameters, targetNetPositionsStream, true, true);
     }
 
-    public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, BalanceComputationParameters parameters,
+    public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid,
+                                                              List<UUID> otherNetworksUuid,
+                                                              BalanceComputationParameters parameters,
                                                               InputStream targetNetPositionsStream,
                                                               boolean iterative,
                                                               boolean correctNetPositionsInconsistencies) throws ExecutionException, InterruptedException, IOException {
-        Network network = getNetwork(networkUuid);
+        Network network;
+
+        if (otherNetworksUuid.isEmpty()) {
+            network = getNetwork(networkUuid);
+        } else {
+            // creation of the merging view and merging the networks
+            MergingView merginvView = MergingView.create("merged", "iidm");
+
+            List<Network> networks = new ArrayList<>();
+            networks.add(getNetwork(networkUuid));
+            otherNetworksUuid.forEach(uuid -> networks.add(getNetwork(uuid)));
+            merginvView.merge(networks.toArray(new Network[networks.size()]));
+
+            network = merginvView;
+        }
 
         BalanceComputationParameters params = parameters != null ? parameters : new BalanceComputationParameters();
         Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
