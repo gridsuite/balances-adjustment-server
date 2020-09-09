@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -27,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.ResourceUtils;
 
 import javax.inject.Inject;
@@ -35,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -81,13 +80,10 @@ public class BalancesAdjustmentTest {
                 "text/json", new FileInputStream(ResourceUtils.getFile("classpath:balanceComputationParameters.json")));
 
         MockMultipartHttpServletRequestBuilder builderOk =
-                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", "7928181c-7977-4592-ba19-88027e4254e4");
-        builderOk.with(new RequestPostProcessor() {
-            @Override
-            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-                request.setMethod("PUT");
-                return request;
-            }
+                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", testNetworkId.toString());
+        builderOk.with(request -> {
+            request.setMethod("PUT");
+            return request;
         });
 
         // Check request is ok with only target net positions multipart file provided
@@ -109,15 +105,60 @@ public class BalancesAdjustmentTest {
 
         // Check request is ko when no target net position multipart file is provided
         MockMultipartHttpServletRequestBuilder builderKo =
-                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", "7928181c-7977-4592-ba19-88027e4254e4");
-        builderKo.with(new RequestPostProcessor() {
-            @Override
-            public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-                request.setMethod("PUT");
-                return request;
-            }
+                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", testNetworkId.toString());
+        builderKo.with(request -> {
+            request.setMethod("PUT");
+            return request;
         });
 
+        mvc.perform(builderKo)
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testBalancesAdjustmentControllerWithMergingView() throws Exception {
+        UUID testNetworkId1 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
+        UUID testNetworkId2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
+        UUID testNetworkId3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
+
+        Network testNetwork2 = Importers.loadNetwork("testCase2.xiidm", getClass().getResourceAsStream("/testCase2.xiidm"));
+        Network testNetwork3 = Importers.loadNetwork("testCase3.xiidm", getClass().getResourceAsStream("/testCase3.xiidm"));
+        given(networkStoreService.getNetwork(testNetworkId1, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
+        given(networkStoreService.getNetwork(testNetworkId2, PreloadingStrategy.COLLECTION)).willReturn(testNetwork2);
+        given(networkStoreService.getNetwork(testNetworkId3, PreloadingStrategy.COLLECTION)).willReturn(testNetwork3);
+
+        MockMultipartFile file = new MockMultipartFile("targetNetPositionFile", "workingTargetNetPositions.json",
+                "text/json", new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json")));
+
+        MockMultipartFile parametersFile = new MockMultipartFile("balanceComputationParamsFile", "balanceComputationParameters2.json",
+                "text/json", new FileInputStream(ResourceUtils.getFile("classpath:balanceComputationParameters2.json")));
+
+        MockMultipartHttpServletRequestBuilder builderOk =
+                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", testNetworkId1.toString());
+        builderOk.param("networkUuid", testNetworkId2.toString()).param("networkUuid", testNetworkId3.toString());
+        builderOk.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
+
+        // Check request is ok with target net positions and balances computation parameters multipart file provided
+        MvcResult result = mvc.perform(builderOk
+                .file(file)
+                .file(parametersFile))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn();
+        assertTrue(result.getResponse().getContentAsString().contains("status\":\"SUCCESS\""));
+        assertTrue(result.getResponse().getContentAsString().contains("iterationCount\":2"));
+
+        // Check request is ko when no target net position multipart file is provided
+        MockMultipartHttpServletRequestBuilder builderKo =
+                MockMvcRequestBuilders.multipart("/v1/networks/{networkUuid}/run", testNetworkId1.toString());
+        builderKo.param("networkUuid", testNetworkId2.toString()).param("networkUuid", testNetworkId3.toString());
+        builderKo.with(request -> {
+            request.setMethod("PUT");
+            return request;
+        });
         mvc.perform(builderKo)
                 .andExpect(status().isBadRequest());
     }
@@ -132,7 +173,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, Collections.emptyList(), balanceComputationParameters, targetNetPositionsIStream);
         assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
         assertEquals(2, balanceComputationResult.getIterationCount());
 
@@ -167,7 +208,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, true, false);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, Collections.emptyList(), balanceComputationParameters, targetNetPositionsIStream, true, false);
         assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
         assertEquals(10, balanceComputationResult.getIterationCount());
     }

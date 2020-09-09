@@ -51,11 +51,10 @@
         <springboot.version>2.1.5.RELEASE</springboot.version>
         <springfox.version>2.9.2</springfox.version>
 
-        <powsybl-core.version>3.5.0</powsybl-core.version>
+        <powsybl-core.version>3.6.0</powsybl-core.version>
         <powsybl-network-store.version>1.0.0-SNAPSHOT</powsybl-network-store.version>
         <powsybl-balances-adjustment.version>1.2.1</powsybl-balances-adjustment.version>
         <powsybl.open-loadflow.version>0.5.0</powsybl.open-loadflow.version>
-
     </properties>
 
     <build>
@@ -136,6 +135,17 @@
             <artifactId>powsybl-open-loadflow</artifactId>
             <version>${powsybl.open-loadflow.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-iidm-api</artifactId>
+            <version>${powsybl-core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-iidm-mergingview</artifactId>
+            <version>${powsybl-core.version}</version>
+        </dependency>
 
         <!-- Runtime dependencies -->
         <dependency>
@@ -163,6 +173,12 @@
             <artifactId>powsybl-iidm-xml-converter</artifactId>
             <version>${powsybl-core.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.powsybl</groupId>
+            <artifactId>powsybl-iidm-impl</artifactId>
+            <version>${powsybl-core.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>
