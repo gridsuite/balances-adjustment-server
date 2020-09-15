@@ -93,17 +93,18 @@ public class BalancesAdjustmentService {
                                                               boolean iterative,
                                                               boolean correctNetPositionsInconsistencies) throws ExecutionException, InterruptedException, IOException {
         Network network;
+        List<Network> listNetworks = new ArrayList<>();
 
         if (otherNetworksUuid.isEmpty()) {
             network = getNetwork(networkUuid);
+            listNetworks.add(network);
         } else {
             // creation of the merging view and merging the networks
             MergingView merginvView = MergingView.create("merged", "iidm");
 
-            List<Network> networks = new ArrayList<>();
-            networks.add(getNetwork(networkUuid));
-            otherNetworksUuid.forEach(uuid -> networks.add(getNetwork(uuid)));
-            merginvView.merge(networks.toArray(new Network[networks.size()]));
+            listNetworks.add(getNetwork(networkUuid));
+            otherNetworksUuid.forEach(uuid -> listNetworks.add(getNetwork(uuid)));
+            merginvView.merge(listNetworks.toArray(new Network[listNetworks.size()]));
 
             network = merginvView;
         }
@@ -123,7 +124,7 @@ public class BalancesAdjustmentService {
 
         BalanceComputationResult result = futureResult.get();
         if (result.getStatus() == BalanceComputationResult.Status.SUCCESS) {
-            networkStoreService.flush(network);
+            listNetworks.forEach(n -> networkStoreService.flush(n));
         }
         return result;
     }
