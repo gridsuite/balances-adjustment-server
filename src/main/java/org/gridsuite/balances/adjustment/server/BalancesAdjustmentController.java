@@ -10,13 +10,13 @@ import com.powsybl.balances_adjustment.balance_computation.BalanceComputationPar
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationResult;
 import com.powsybl.balances_adjustment.balance_computation.json_parameters.JsonBalanceComputationParameters;
 import io.swagger.annotations.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -36,7 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @ComponentScan(basePackageClasses = BalancesAdjustmentService.class)
 public class BalancesAdjustmentController {
 
-    @Inject
+    @Autowired
     private BalancesAdjustmentService balancesAdjustmentService;
 
     @PutMapping(value = "/networks/{networkUuid}/run", produces = APPLICATION_JSON_VALUE)

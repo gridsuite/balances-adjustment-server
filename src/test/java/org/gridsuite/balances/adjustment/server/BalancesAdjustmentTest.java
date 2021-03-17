@@ -28,7 +28,6 @@ import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequ
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.ResourceUtils;
 
-import javax.inject.Inject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +54,7 @@ public class BalancesAdjustmentTest {
     @Autowired
     private MockMvc mvc;
 
-    @Inject
+    @Autowired
     private BalancesAdjustmentService balancesAdjustmentService;
 
     @MockBean
