@@ -179,12 +179,12 @@ public class BalancesAdjustmentTest {
         // BELGIUM
         assertEquals(724.8642, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.1);
         assertEquals(1208.1071, testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.1);
-        assertEquals(1449.7285, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
+        assertEquals(1449.6120, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
 
         // FRANCE
         assertEquals(3143.6285, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.1);
         assertEquals(3143.6285, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.1);
-        assertEquals(4715.4428, testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.1);
+        assertEquals(4715.5596, testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.1);
 
         // GERMANY
         assertEquals(1665.2083, testNetwork.getGenerator("DDE1AA1 _generator").getTargetP(), 0.1);
