@@ -209,7 +209,7 @@ public class BalancesAdjustmentTest {
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
         BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, Collections.emptyList(), balanceComputationParameters, targetNetPositionsIStream, true, false);
         assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
-        assertEquals(10, balanceComputationResult.getIterationCount());
+        assertEquals(11, balanceComputationResult.getIterationCount());
     }
 
     @Test
