@@ -9,7 +9,11 @@ package org.gridsuite.balances.adjustment.server;
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationParameters;
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationResult;
 import com.powsybl.balances_adjustment.balance_computation.json_parameters.JsonBalanceComputationParameters;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
@@ -32,7 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  */
 @RestController
 @RequestMapping(value = "/" + BalancesAdjustmentApi.API_VERSION + "/")
-@Api(tags = "balances-adjustment-server")
+@Tag(name = "balances-adjustment-server")
 @ComponentScan(basePackageClasses = BalancesAdjustmentService.class)
 public class BalancesAdjustmentController {
 
@@ -40,10 +44,10 @@ public class BalancesAdjustmentController {
     private BalancesAdjustmentService balancesAdjustmentService;
 
     @PutMapping(value = "/networks/{networkUuid}/run", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "run a balances adjustment on a network", produces = APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "The balances adjustment has been performed")})
-    public ResponseEntity<BalanceComputationResult> computeBalancesAdjustment(@ApiParam(value = "Network UUID") @PathVariable("networkUuid") UUID networkUuid,
-                                                                              @ApiParam(value = "Other networks UUID") @RequestParam(name = "networkUuid", required = false) List<String> otherNetworks,
+    @Operation(summary = "run a balances adjustment on a network")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The balances adjustment has been performed")})
+    public ResponseEntity<BalanceComputationResult> computeBalancesAdjustment(@Parameter(description = "Network UUID") @PathVariable("networkUuid") UUID networkUuid,
+                                                                              @Parameter(description = "Other networks UUID") @RequestParam(name = "networkUuid", required = false) List<String> otherNetworks,
                                                                               @RequestParam(value = "balanceComputationParamsFile", required = false) MultipartFile balanceComputationParams,
                                                                               @RequestParam("targetNetPositionFile") MultipartFile targetNetPositionFile) throws ExecutionException, InterruptedException, IOException {
         BalanceComputationParameters parameters = balanceComputationParams != null
