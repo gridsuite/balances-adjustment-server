@@ -2,10 +2,6 @@ spring:
   application:
     name: balances-adjustment-server
 
-springdoc:
-  swagger-ui:
-    path: swagger-ui.html
-
 server:
   port: 5009
   forward-headers-strategy: framework
