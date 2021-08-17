@@ -43,7 +43,7 @@ public class BalancesAdjustmentController {
     @Autowired
     private BalancesAdjustmentService balancesAdjustmentService;
 
-    @PutMapping(value = "/networks/{networkUuid}/run", produces = APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/networks/{networkUuid}/run", produces = APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "run a balances adjustment on a network")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "The balances adjustment has been performed")})
     public ResponseEntity<BalanceComputationResult> computeBalancesAdjustment(@Parameter(description = "Network UUID") @PathVariable("networkUuid") UUID networkUuid,
