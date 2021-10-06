@@ -1,10 +1,9 @@
 spring:
+  profiles:
+    active: default,local
+
   application:
     name: balances-adjustment-server
 
 server:
-  port: 5009
   forward-headers-strategy: framework
-
-network-store-server:
-  base-uri: http://localhost:8080
