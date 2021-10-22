@@ -13,11 +13,7 @@ import com.powsybl.balances_adjustment.util.NetworkAreaFactory;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.computation.local.LocalComputationManagerFactory;
 import com.powsybl.iidm.mergingview.MergingView;
-import com.powsybl.iidm.network.Country;
-import com.powsybl.iidm.network.Generator;
-import com.powsybl.iidm.network.Injection;
-import com.powsybl.iidm.network.Network;
-import com.powsybl.iidm.network.VariantManagerConstants;
+import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
@@ -180,7 +176,8 @@ public class BalancesAdjustmentService {
         String countryCode = country.toString();
         NetworkAreaFactory networkArea = networkAreas.get(countryCode);
         Double targetNetPosition = targetNetPositions.get(countryCode);
-        List<Generator> countryGenerators = network.getGeneratorStream().filter(g -> country.getName().equals(g.getTerminal().getVoltageLevel().getSubstation().getCountry().get().getName())).collect(Collectors.toList());
+        List<Generator> countryGenerators = network.getGeneratorStream()
+                .filter(g -> country.getName().equals(g.getTerminal().getVoltageLevel().getSubstation().flatMap(Substation::getCountry).orElseThrow().getName())).collect(Collectors.toList()); // TODO
         double countryGeneratorsTotalP = 0d;
         for (Generator g : countryGenerators) {
             countryGeneratorsTotalP += g.getTargetP();
