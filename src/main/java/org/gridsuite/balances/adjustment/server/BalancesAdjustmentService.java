@@ -6,13 +6,13 @@
  */
 package org.gridsuite.balances.adjustment.server;
 
-import com.powsybl.action.util.Scalable;
 import com.powsybl.balances_adjustment.balance_computation.*;
 import com.powsybl.balances_adjustment.util.CountryAreaFactory;
 import com.powsybl.balances_adjustment.util.NetworkAreaFactory;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.computation.local.LocalComputationManagerFactory;
 import com.powsybl.iidm.mergingview.MergingView;
+import com.powsybl.iidm.modification.scalable.Scalable;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
 import com.powsybl.network.store.client.NetworkStoreService;
