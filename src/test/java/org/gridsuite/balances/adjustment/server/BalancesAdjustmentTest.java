@@ -4,7 +4,6 @@ import com.powsybl.balances_adjustment.balance_computation.BalanceComputationAre
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationParameters;
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationResult;
 import com.powsybl.balances_adjustment.balance_computation.json_parameters.JsonBalanceComputationParameters;
-import com.powsybl.iidm.import_.Importers;
 import com.powsybl.iidm.modification.scalable.Scalable;
 import com.powsybl.iidm.network.Injection;
 import com.powsybl.iidm.network.Network;
@@ -62,7 +61,7 @@ public class BalancesAdjustmentTest {
 
     @Before
     public void setUp() {
-        testNetwork = Importers.loadNetwork("testCase.xiidm", getClass().getResourceAsStream("/testCase.xiidm"));
+        testNetwork = Network.read("testCase.xiidm", getClass().getResourceAsStream("/testCase.xiidm"));
         MockitoAnnotations.initMocks(this);
     }
 
@@ -120,8 +119,8 @@ public class BalancesAdjustmentTest {
         UUID testNetworkId2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
         UUID testNetworkId3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
 
-        Network testNetwork2 = Importers.loadNetwork("testCase2.xiidm", getClass().getResourceAsStream("/testCase2.xiidm"));
-        Network testNetwork3 = Importers.loadNetwork("testCase3.xiidm", getClass().getResourceAsStream("/testCase3.xiidm"));
+        Network testNetwork2 = Network.read("testCase2.xiidm", getClass().getResourceAsStream("/testCase2.xiidm"));
+        Network testNetwork3 = Network.read("testCase3.xiidm", getClass().getResourceAsStream("/testCase3.xiidm"));
         given(networkStoreService.getNetwork(testNetworkId1, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
         given(networkStoreService.getNetwork(testNetworkId2, PreloadingStrategy.COLLECTION)).willReturn(testNetwork2);
         given(networkStoreService.getNetwork(testNetworkId3, PreloadingStrategy.COLLECTION)).willReturn(testNetwork3);
