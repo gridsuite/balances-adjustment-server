@@ -196,6 +196,6 @@ public class BalancesAdjustmentService {
             scalables.add(Scalable.onGenerator(g.getId()));
             LOGGER.debug("Addition of percentage {} for generator {}", percent, g.getId());
         }
-        return !countryGenerators.isEmpty() && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables, iterative), targetNetPosition) : null;
+        return !countryGenerators.isEmpty() && targetNetPosition != null ? new BalanceComputationArea(countryName, networkArea, Scalable.proportional(percentages, scalables), targetNetPosition) : null;
     }
 }

@@ -5,6 +5,7 @@ import com.powsybl.balances_adjustment.balance_computation.BalanceComputationPar
 import com.powsybl.balances_adjustment.balance_computation.BalanceComputationResult;
 import com.powsybl.balances_adjustment.balance_computation.json_parameters.JsonBalanceComputationParameters;
 import com.powsybl.iidm.modification.scalable.Scalable;
+import com.powsybl.iidm.modification.scalable.ScalingParameters;
 import com.powsybl.iidm.network.Injection;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
@@ -249,11 +250,11 @@ public class BalancesAdjustmentTest {
             assertEquals(1500, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2500, testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.1);
             assertEquals(3000, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(1607.14285, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2678.5714, testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.1);
             assertEquals(3214.2857, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 20000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 20000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(5892.8571, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("BBE3AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("BBE2AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
@@ -278,11 +279,11 @@ public class BalancesAdjustmentTest {
             assertEquals(2000, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2000, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.1);
             assertEquals(3000, testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 1000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 1000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(2285.7142, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2285.7142, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.1);
             assertEquals(3428.5714, testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 15000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 15000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(6571.4285, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.1);
             assertEquals(6571.4285, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("FFR3AA1 _generator").getMaxP(), testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.1);
@@ -307,7 +308,7 @@ public class BalancesAdjustmentTest {
             assertEquals(2500, testNetwork.getGenerator("DDE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2000, testNetwork.getGenerator("DDE2AA1 _generator").getTargetP(), 0.1);
             assertEquals(1500, testNetwork.getGenerator("DDE3AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(2).getScalable().scale(testNetwork, 800, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(2).getScalable().scale(testNetwork, 800, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(2833.3333, testNetwork.getGenerator("DDE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2266.6666, testNetwork.getGenerator("DDE2AA1 _generator").getTargetP(), 0.1);
             assertEquals(1700, testNetwork.getGenerator("DDE3AA1 _generator").getTargetP(), 0.1);
@@ -332,11 +333,11 @@ public class BalancesAdjustmentTest {
             assertEquals(1500, testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.1);
             assertEquals(500, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.1);
             assertEquals(2500, testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 1500, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 1500, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(2000, testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.1);
             assertEquals(666.6666, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.1);
             assertEquals(3333.3333, testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 25000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 25000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR));
             assertEquals(testNetwork.getGenerator("NNL1AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.1);
             assertEquals(3444.4443, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("NNL3AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.1);
@@ -357,29 +358,29 @@ public class BalancesAdjustmentTest {
             List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true, true);
 
             // BELGIUM
-            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR).setIterative(true));
             assertEquals(1607.14285, testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(2678.5714, testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.1);
             assertEquals(3214.2857, testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
-            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 20000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(0).getScalable().scale(testNetwork, 20000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR).setIterative(true));
             assertEquals(testNetwork.getGenerator("BBE1AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("BBE3AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE3AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("BBE2AA1 _generator").getMaxP(), testNetwork.getGenerator("BBE2AA1 _generator").getTargetP(), 0.1);
 
             // FRANCE
-            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 15000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(1).getScalable().scale(testNetwork, 15000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR).setIterative(true));
             assertEquals(6500, testNetwork.getGenerator("FFR1AA1 _generator").getTargetP(), 0.1);
             assertEquals(6500, testNetwork.getGenerator("FFR2AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("FFR3AA1 _generator").getMaxP(), testNetwork.getGenerator("FFR3AA1 _generator").getTargetP(), 0.1);
 
             // GERMANY
-            balanceComputationAreas.get(2).getScalable().scale(testNetwork, 17000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(2).getScalable().scale(testNetwork, 17000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR).setIterative(true));
             assertEquals(testNetwork.getGenerator("DDE1AA1 _generator").getMaxP(), testNetwork.getGenerator("DDE1AA1 _generator").getTargetP(), 0.1);
             assertEquals(8000, testNetwork.getGenerator("DDE2AA1 _generator").getTargetP(), 0.1);
             assertEquals(6000, testNetwork.getGenerator("DDE3AA1 _generator").getTargetP(), 0.1);
 
             // NETHERLANDS
-            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 25000, Scalable.ScalingConvention.GENERATOR);
+            balanceComputationAreas.get(3).getScalable().scale(testNetwork, 25000, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR).setIterative(true));
             assertEquals(testNetwork.getGenerator("NNL1AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("NNL2AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("NNL3AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.1);
