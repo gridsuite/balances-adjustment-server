@@ -109,7 +109,7 @@ public class BalancesAdjustmentService {
         Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
 
         BalanceComputationFactory balanceComputationFactory = new BalanceComputationFactoryImpl();
-        List<BalanceComputationArea> computationAreas = createBalanceComputationAreas(network, targetNetPositions, iterative, correctNetPositionsInconsistencies);
+        List<BalanceComputationArea> computationAreas = createBalanceComputationAreas(network, targetNetPositions, correctNetPositionsInconsistencies);
         BalanceComputation balanceComputation = balanceComputationFactory.create(computationAreas, LoadFlow.find(), new LocalComputationManagerFactory().create());
 
         fixMinP(network, computationAreas);
@@ -154,8 +154,7 @@ public class BalancesAdjustmentService {
         });
     }
 
-    public List<BalanceComputationArea> createBalanceComputationAreas(Network network, Map<String, Double> targetNetPositions,
-                                                                      boolean iterative, boolean correctNetPositionsInconsistencies) {
+    public List<BalanceComputationArea> createBalanceComputationAreas(Network network, Map<String, Double> targetNetPositions, boolean correctNetPositionsInconsistencies) {
         Map<String, NetworkAreaFactory> networkAreas = network.getCountries().stream()
                 .collect(Collectors.toMap(Country::toString, CountryAreaFactory::new));
 
@@ -165,13 +164,13 @@ public class BalancesAdjustmentService {
         }
 
         return network.getCountries().stream()
-                .map(country -> createBalanceComputationArea(network, country, networkAreas, targetNetPositions, iterative))
+                .map(country -> createBalanceComputationArea(network, country, networkAreas, targetNetPositions))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     private BalanceComputationArea createBalanceComputationArea(Network network, Country country, Map<String, NetworkAreaFactory> networkAreas,
-                                                                Map<String, Double> targetNetPositions, boolean iterative) {
+                                                                Map<String, Double> targetNetPositions) {
         String countryName = country.getName();
         String countryCode = country.toString();
         NetworkAreaFactory networkArea = networkAreas.get(countryCode);

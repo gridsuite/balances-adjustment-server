@@ -224,7 +224,7 @@ public class BalancesAdjustmentTest {
             assertEquals(5002.7, targetNetPositions.get("FR"), 0.1);
             assertEquals(1618.2, targetNetPositions.get("NL"), 0.1);
 
-            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false, true);
+            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true);
 
             // target net positions not changed in the balance computation areas creation
             assertEquals(4, targetNetPositions.size());
@@ -355,7 +355,7 @@ public class BalancesAdjustmentTest {
     public void testNetworkComputationAreasCreationIterativeMode() {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
-            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true, true);
+            List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true);
 
             // BELGIUM
             balanceComputationAreas.get(0).getScalable().scale(testNetwork, 500, new ScalingParameters().setScalingConvention(Scalable.ScalingConvention.GENERATOR).setIterative(true));
@@ -401,7 +401,7 @@ public class BalancesAdjustmentTest {
             assertEquals(5925.7, targetNetPositions.get("FR"), 0.1);
             assertEquals(2398.2, targetNetPositions.get("NL"), 0.1);
 
-            balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, false, true);
+            balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true);
 
             // target net positions adjusted in the balance computation areas creation
             assertEquals(4, targetNetPositions.size());
