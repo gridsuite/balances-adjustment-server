@@ -79,14 +79,13 @@ public class BalancesAdjustmentService {
 
     public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, List<UUID> otherNetworksUuid, BalanceComputationParameters parameters,
                                                               InputStream targetNetPositionsStream)  throws ExecutionException, InterruptedException, IOException {
-        return computeBalancesAdjustment(networkUuid, otherNetworksUuid, parameters, targetNetPositionsStream, true, true);
+        return computeBalancesAdjustment(networkUuid, otherNetworksUuid, parameters, targetNetPositionsStream, true);
     }
 
     public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid,
                                                               List<UUID> otherNetworksUuid,
                                                               BalanceComputationParameters parameters,
                                                               InputStream targetNetPositionsStream,
-                                                              boolean iterative,
                                                               boolean correctNetPositionsInconsistencies) throws ExecutionException, InterruptedException, IOException {
         Network network;
         List<Network> listNetworks = new ArrayList<>();
