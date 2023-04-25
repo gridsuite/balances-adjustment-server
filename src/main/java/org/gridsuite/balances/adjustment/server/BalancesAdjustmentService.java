@@ -78,7 +78,7 @@ public class BalancesAdjustmentService {
     }
 
     public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, List<UUID> otherNetworksUuid, BalanceComputationParameters parameters,
-                                                              InputStream targetNetPositionsStream)  throws ExecutionException, InterruptedException, IOException {
+                                                              InputStream targetNetPositionsStream) throws ExecutionException, InterruptedException, IOException {
         return computeBalancesAdjustment(networkUuid, otherNetworksUuid, parameters, targetNetPositionsStream, true);
     }
 
