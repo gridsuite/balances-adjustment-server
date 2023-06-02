@@ -46,7 +46,7 @@
     <properties>
         <java.version>17</java.version>
 
-        <gridsuite-dependencies.version>25-SNAPSHOT</gridsuite-dependencies.version>
+        <gridsuite-dependencies.version>25</gridsuite-dependencies.version>
     </properties>
 
     <build>
