@@ -32,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -172,7 +171,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, Collections.emptyList(), balanceComputationParameters, targetNetPositionsIStream);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream);
         assertEquals(BalanceComputationResult.Status.SUCCESS, balanceComputationResult.getStatus());
         assertEquals(2, balanceComputationResult.getIterationCount());
 
@@ -207,7 +206,7 @@ public class BalancesAdjustmentTest {
         BalanceComputationParameters balanceComputationParameters = JsonBalanceComputationParameters.read(balanceComputationParametersIStream);
 
         InputStream targetNetPositionsIStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"));
-        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, Collections.emptyList(), balanceComputationParameters, targetNetPositionsIStream, false);
+        BalanceComputationResult balanceComputationResult = balancesAdjustmentService.computeBalancesAdjustment(testNetworkId, balanceComputationParameters, targetNetPositionsIStream, false);
         assertEquals(BalanceComputationResult.Status.FAILED, balanceComputationResult.getStatus());
         assertEquals(11, balanceComputationResult.getIterationCount());
     }

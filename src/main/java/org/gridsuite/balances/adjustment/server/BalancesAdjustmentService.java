@@ -11,7 +11,6 @@ import com.powsybl.balances_adjustment.util.CountryAreaFactory;
 import com.powsybl.balances_adjustment.util.NetworkAreaFactory;
 import com.powsybl.commons.PowsyblException;
 import com.powsybl.computation.local.LocalComputationManagerFactory;
-import com.powsybl.iidm.mergingview.MergingView;
 import com.powsybl.iidm.modification.scalable.Scalable;
 import com.powsybl.iidm.network.*;
 import com.powsybl.loadflow.LoadFlow;
@@ -77,32 +76,20 @@ public class BalancesAdjustmentService {
         });
     }
 
-    public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, List<UUID> otherNetworksUuid, BalanceComputationParameters parameters,
+    public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid, BalanceComputationParameters parameters,
                                                               InputStream targetNetPositionsStream) throws ExecutionException, InterruptedException, IOException {
-        return computeBalancesAdjustment(networkUuid, otherNetworksUuid, parameters, targetNetPositionsStream, true);
+        return computeBalancesAdjustment(networkUuid, parameters, targetNetPositionsStream, true);
     }
 
     public BalanceComputationResult computeBalancesAdjustment(UUID networkUuid,
-                                                              List<UUID> otherNetworksUuid,
                                                               BalanceComputationParameters parameters,
                                                               InputStream targetNetPositionsStream,
                                                               boolean correctNetPositionsInconsistencies) throws ExecutionException, InterruptedException, IOException {
         Network network;
         List<Network> listNetworks = new ArrayList<>();
 
-        if (otherNetworksUuid.isEmpty()) {
-            network = getNetwork(networkUuid);
-            listNetworks.add(network);
-        } else {
-            // creation of the merging view and merging the networks
-            MergingView merginvView = MergingView.create("merged", "iidm");
-
-            listNetworks.add(getNetwork(networkUuid));
-            otherNetworksUuid.forEach(uuid -> listNetworks.add(getNetwork(uuid)));
-            merginvView.merge(listNetworks.toArray(new Network[listNetworks.size()]));
-
-            network = merginvView;
-        }
+        network = getNetwork(networkUuid);
+        listNetworks.add(network);
 
         BalanceComputationParameters params = parameters != null ? parameters : new BalanceComputationParameters();
         Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
@@ -180,13 +167,13 @@ public class BalancesAdjustmentService {
         for (Generator g : countryGenerators) {
             countryGeneratorsTotalP += g.getTargetP();
         }
-        List<Float> percentages = new ArrayList<>();
+        List<Double> percentages = new ArrayList<>();
         List<Scalable> scalables = new ArrayList<>();
         LOGGER.debug("Size of generators list: {} for country {}", countryGenerators.size(), countryName);
         for (Generator g : countryGenerators) {
-            float percent;
+            double percent;
             if (countryGeneratorsTotalP != 0) {
-                percent = (float) (g.getTargetP() / countryGeneratorsTotalP * 100);
+                percent = g.getTargetP() / countryGeneratorsTotalP * 100;
             } else {
                 percent = 100f / countryGenerators.size();
             }
