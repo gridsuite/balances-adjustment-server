@@ -11,9 +11,8 @@ import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
 import org.gridsuite.balances.adjustment.server.importer.TargetNetPositionsImporter;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -21,7 +20,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
@@ -29,24 +27,21 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.ResourceUtils;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(BalancesAdjustmentController.class)
 @ContextConfiguration(classes = {BalancesAdjustmentApplication.class})
-public class BalancesAdjustmentTest {
+class BalancesAdjustmentTest {
 
     private Network testNetwork;
 
@@ -59,14 +54,14 @@ public class BalancesAdjustmentTest {
     @MockBean
     private NetworkStoreService networkStoreService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         testNetwork = Network.read("testCase.xiidm", getClass().getResourceAsStream("/testCase.xiidm"));
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testBalancesAdjustmentController() throws Exception {
+    void testBalancesAdjustmentController() throws Exception {
         UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
 
         given(networkStoreService.getNetwork(testNetworkId, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
@@ -114,7 +109,7 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
-    public void testBalancesAdjustmentControllerWithMergingView() throws Exception {
+    void testBalancesAdjustmentControllerWithMergingView() throws Exception {
         UUID testNetworkId1 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
         UUID testNetworkId2 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e5");
         UUID testNetworkId3 = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e6");
@@ -162,7 +157,7 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
-    public void testSuccessBalancesAdjustmentComputation() throws InterruptedException, ExecutionException, IOException {
+    void testSuccessBalancesAdjustmentComputation() throws Exception {
         UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
 
         given(networkStoreService.getNetwork(testNetworkId, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
@@ -197,7 +192,7 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
-    public void testFailedWorkingBalancesAdjustmentComputation() throws InterruptedException, ExecutionException, IOException {
+    void testFailedWorkingBalancesAdjustmentComputation() throws Exception {
         UUID testNetworkId = UUID.fromString("7928181c-7977-4592-ba19-88027e4254e4");
 
         given(networkStoreService.getNetwork(testNetworkId, PreloadingStrategy.COLLECTION)).willReturn(testNetwork);
@@ -212,7 +207,7 @@ public class BalancesAdjustmentTest {
     }
 
     @Test
-    public void testNetworkComputationAreasCreationNoIterativeMode() {
+    void testNetworkComputationAreasCreationNoIterativeMode() throws Exception {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
 
@@ -344,14 +339,11 @@ public class BalancesAdjustmentTest {
             assertEquals(0, testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.1);
             assertEquals(0, testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.1);
             assertEquals(0, testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.1);
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     @Test
-    public void testNetworkComputationAreasCreationIterativeMode() {
+    void testNetworkComputationAreasCreationIterativeMode() throws Exception {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:workingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
             List<BalanceComputationArea> balanceComputationAreas = balancesAdjustmentService.createBalanceComputationAreas(testNetwork, targetNetPositions, true);
@@ -383,13 +375,11 @@ public class BalancesAdjustmentTest {
             assertEquals(testNetwork.getGenerator("NNL1AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL1AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("NNL2AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL2AA1 _generator").getTargetP(), 0.1);
             assertEquals(testNetwork.getGenerator("NNL3AA1 _generator").getMaxP(), testNetwork.getGenerator("NNL3AA1 _generator").getTargetP(), 0.1);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     @Test
-    public void testTargetNetPositions() throws IOException {
+    void testTargetNetPositions() throws Exception {
         try (InputStream targetNetPositionsStream = new FileInputStream(ResourceUtils.getFile("classpath:failingTargetNetPositions.json"))) {
             Map<String, Double> targetNetPositions = TargetNetPositionsImporter.getTargetNetPositionsAreasFromFile(targetNetPositionsStream);
 
