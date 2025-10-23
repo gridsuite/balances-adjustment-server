@@ -43,7 +43,7 @@
 
     <properties>
 
-        <gridsuite-dependencies.version>43.0.0</gridsuite-dependencies.version>
+        <gridsuite-dependencies.version>43.2.0-SNAPSHOT</gridsuite-dependencies.version>
         <sonar.organization>gridsuite</sonar.organization>
         <sonar.projectKey>org.gridsuite:balances-adjustment-server</sonar.projectKey>
     </properties>
