@@ -10,6 +10,7 @@ import com.powsybl.iidm.network.Injection;
 import com.powsybl.iidm.network.Network;
 import com.powsybl.network.store.client.NetworkStoreService;
 import com.powsybl.network.store.client.PreloadingStrategy;
+import com.powsybl.network.store.client.RestClientImpl;
 import org.gridsuite.balances.adjustment.server.importer.TargetNetPositionsImporter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,9 @@ class BalancesAdjustmentTest {
 
     @MockitoBean
     private NetworkStoreService networkStoreService;
+
+    @MockitoBean
+    private RestClientImpl restClient;
 
     @BeforeEach
     void setUp() {
