@@ -28,7 +28,7 @@ public final class TargetNetPositionsImporter {
         JsonNode jsonTree = mapper.readTree(input);
         if (jsonTree.hasNonNull("netPositions")) {
             JsonNode jsonExchangeData = jsonTree.get("netPositions");
-            for (Iterator<JsonNode> it = jsonExchangeData.elements(); it.hasNext(); ) {
+            for (Iterator<JsonNode> it = jsonExchangeData.elements(); it.hasNext();) {
                 JsonNode areaElement = it.next();
                 if (areaElement.hasNonNull("area") && areaElement.hasNonNull("netPosition")) {
                     String area = areaElement.get("area").asText();
